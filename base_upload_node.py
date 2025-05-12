@@ -1,0 +1,40 @@
+import requests
+from PIL import Image
+from io import BytesIO
+import base64
+import numpy as np
+import torch
+
+class UploadToBaseNode:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "api_key": ("STRING", {"default": ""}),
+                "prompt": ("STRING", {"default": ""}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    FUNCTION = "run"
+    CATEGORY = "BASE"
+
+    def run(self, image, api_key, prompt):
+        image_data = image[0]
+        img_array = (image_data.cpu().numpy().transpose(1, 2, 0) * 255).clip(0, 255).astype("uint8")
+        img = Image.fromarray(img_array)
+        buffer = BytesIO()
+        img.save(buffer, format="JPEG")
+        b64_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        response = requests.post("https://your-api-url/uploadImageToBase", json={
+            "imageBase64": b64_image,
+            "prompt": prompt,
+            "apiKey": api_key,
+        }, timeout=30)
+
+        if response.ok:
+            return (response.json().get("url", "Upload successful"),)
+        else:
+            return (f"Upload failed: {response.status_code}",)
