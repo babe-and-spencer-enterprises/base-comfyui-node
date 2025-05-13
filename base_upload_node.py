@@ -12,18 +12,18 @@ class UploadToBaseNode:
             "required": {
                 "image": ("IMAGE",),
                 "api_key": ("STRING", {"default": ""}),
-                "prompt": ("STRING", {"default": ""}),
+                "folder": ("STRING", {"default": ""}),
             }
         }
 
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = ()
     FUNCTION = "run"
     CATEGORY = "BASE"
 
-    def run(self, image, api_key, prompt):
+    def run(self, image, api_key, folder):
         print("BASE node: running")
         print("API key:", api_key)
-        print("Prompt:", prompt)
+        print("Folder:", folder)
 
         image_data = image[0]
         img_array = (image_data.cpu().numpy() * 255).clip(0, 255).astype("uint8")
@@ -51,10 +51,8 @@ class UploadToBaseNode:
 
         response = requests.post("https://us-central1-base-14bf3.cloudfunctions.net/uploadImageToBase", json={
             "imageBase64": b64_image,
-            "prompt": prompt,
+            "parent": folder or None,
             "apiKey": api_key,
         }, timeout=30)
 
         print("Upload response code:", response.status_code)
-
-        return (image[0],)
