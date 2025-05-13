@@ -21,8 +21,14 @@ class UploadToBaseNode:
     CATEGORY = "BASE"
 
     def run(self, image, api_key, prompt):
+        print("BASE node: running")
+        print("API key:", api_key)
+        print("Prompt:", prompt)
+
         image_data = image[0]
         img_array = (image_data.cpu().numpy().transpose(1, 2, 0) * 255).clip(0, 255).astype("uint8")
+        print("Image shape:", img_array.shape)
+
         img = Image.fromarray(img_array)
         buffer = BytesIO()
         img.save(buffer, format="JPEG")
@@ -33,6 +39,8 @@ class UploadToBaseNode:
             "prompt": prompt,
             "apiKey": api_key,
         }, timeout=30)
+
+        print("Upload response code:", response.status_code)
 
         if response.ok:
             return (response.json().get("url", "Upload successful"),)
