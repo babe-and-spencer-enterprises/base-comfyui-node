@@ -57,3 +57,4 @@ class UploadToBaseNode:
         }, timeout=30)
 
         print("Upload response code:", response.status_code)
+        return []
