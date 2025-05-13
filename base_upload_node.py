@@ -26,19 +26,23 @@ class UploadToBaseNode:
         print("Prompt:", prompt)
 
         image_data = image[0]
-        img_array = (image_data.cpu().numpy().transpose(1, 2, 0) * 255).clip(0, 255).astype("uint8")
-        print("Image shape:", img_array.shape)
+        img_array = (image_data.cpu().numpy() * 255).clip(0, 255).astype("uint8")
+        print("Image shape before handling:", img_array.shape)
 
-        if img_array.ndim == 2:
+        # Ensure shape is (H, W, C)
+        if img_array.ndim == 3 and img_array.shape[2] in {1, 3}:
+            pass  # already (H, W, C)
+        elif img_array.ndim == 3 and img_array.shape[0] in {1, 3}:
+            img_array = np.transpose(img_array, (1, 2, 0))  # (C, H, W) -> (H, W, C)
+        elif img_array.ndim == 2:
             img_array = np.expand_dims(img_array, axis=-1)
+            img_array = np.repeat(img_array, 3, axis=2)
+        else:
+            raise ValueError(f"Unsupported image shape: {img_array.shape}")
 
+        # If still grayscale, convert to RGB
         if img_array.shape[2] == 1:
             img_array = np.repeat(img_array, 3, axis=2)
-        elif img_array.shape[2] == 512 and img_array.shape[1] == 1:
-            img_array = np.transpose(img_array, (2, 1, 0))  # (1, 1, 512) → (512, 1, 1)
-            img_array = np.repeat(img_array, 3, axis=2)  # ensure RGB shape
-        elif img_array.shape[2] != 3:
-            raise ValueError(f"Unsupported image shape: {img_array.shape}")
 
         img = Image.fromarray(img_array)
         buffer = BytesIO()
