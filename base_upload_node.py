@@ -16,7 +16,8 @@ class UploadToBaseNode:
             }
         }
 
-    RETURN_TYPES = ()
+    RETURN_TYPES = None
+    OUTPUT_NODE = True
     FUNCTION = "run"
     CATEGORY = "BASE"
 
