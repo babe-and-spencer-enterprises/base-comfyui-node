@@ -47,7 +47,7 @@ class UploadToBaseNode:
 
         img = Image.fromarray(img_array)
         buffer = BytesIO()
-        img.save(buffer, format="JPEG")
+        img.save(buffer, format="PNG")
         b64_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
         response = requests.post("https://us-central1-base-14bf3.cloudfunctions.net/uploadImageToBase", json={
