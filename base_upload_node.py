@@ -29,6 +29,8 @@ class UploadToBaseNode:
         img_array = (image_data.cpu().numpy().transpose(1, 2, 0) * 255).clip(0, 255).astype("uint8")
         print("Image shape:", img_array.shape)
 
+        if img_array.shape[2] == 1:
+            img_array = np.repeat(img_array, 3, axis=2)
         img = Image.fromarray(img_array)
         buffer = BytesIO()
         img.save(buffer, format="JPEG")
