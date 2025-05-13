@@ -7,7 +7,7 @@ A custom [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node that lets you
 ## 🚀 Features
 
 - Upload any image from a ComfyUI workflow to your BASE account
-- Attach prompt metadata with the image
+- Optionally specify a folder to organize uploads
 - Secure uploads via personal API key
 - Streamlines creative workflow between ComfyUI and BASE
 
@@ -40,23 +40,23 @@ This key securely links your uploads to your BASE account.
 
 ## 🛠️ Node Inputs
 
-| Input     | Description                                            |
-|-----------|--------------------------------------------------------|
-| `image`   | An image tensor (connect from a generation node)       |
-| `prompt`  | (Optional) Prompt text used for generation             |
-| `api_key` | Your personal BASE API key (see above)                 |
+| Input     | Description                                                                 |
+|-----------|-----------------------------------------------------------------------------|
+| `image`   | The generated image to upload (connect from a `VAEDecode` node)             |
+| `api_key` | Your personal BASE API key (see below)                                      |
+| `folder`  | (Optional) The ID of a folder in your BASE account to store the image under |
 
 ---
 
-## 📦 Output
+## 📦 Node Behavior
 
-Returns a confirmation message from the BASE API — typically the uploaded image URL or an `Upload successful` message.
+This is an output node in ComfyUI. It performs an upload as a side effect and does not return any value to the graph.
 
 ---
 
 ## 💡 Example Workflow
 
-Include this node at the end of your generation pipeline to send the final image to BASE. You can optionally attach a prompt or label.
+Place this node at the end of your workflow as an output node. Connect the generated image (typically from a `VAEDecode` node) and provide your BASE API key. The node will upload the image to your BASE account as a side effect; it does not return any value to the graph.
 
 ---
 
