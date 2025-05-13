@@ -16,7 +16,7 @@ class UploadToBaseNode:
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = ("IMAGE",)
     FUNCTION = "run"
     CATEGORY = "BASE"
 
@@ -42,7 +42,4 @@ class UploadToBaseNode:
 
         print("Upload response code:", response.status_code)
 
-        if response.ok:
-            return (response.json().get("url", "Upload successful"),)
-        else:
-            return (f"Upload failed: {response.status_code}",)
+        return (image[0],)
