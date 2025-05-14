@@ -7,7 +7,7 @@ A custom [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node that lets you
 ## 🚀 Features
 
 - Upload any image from a ComfyUI workflow to your BASE account
-- Optionally specify a folder to organize uploads
+- Optionally specify a folder ID to organize uploads
 - Secure uploads via personal API key
 - Streamlines creative workflow between ComfyUI and BASE
 
@@ -40,11 +40,11 @@ This key securely links your uploads to your BASE account.
 
 ## 🛠️ Node Inputs
 
-| Input     | Description                                                                 |
-|-----------|-----------------------------------------------------------------------------|
-| `image`   | The generated image to upload (connect from a `VAEDecode` node)             |
-| `api_key` | Your personal BASE API key (see below)                                      |
-| `folder`  | (Optional) The ID of a folder in your BASE account to store the image under |
+| Input       | Description                                                                                                      |
+|-------------|------------------------------------------------------------------------------------------------------------------|
+| `image`     | The generated image to upload (connect from a `VAEDecode` node)                                                 |
+| `api_key`   | Your personal BASE API key (see below)                                                                          |
+| `folder_id` | (Optional) The ID of a folder in your BASE account to store the image under. Right-click a folder in BASE to copy its ID. |
 
 ---
 
@@ -56,7 +56,7 @@ This is an output node in ComfyUI. It performs an upload as a side effect and do
 
 ## 💡 Example Workflow
 
-Place this node at the end of your workflow as an output node. Connect the generated image (typically from a `VAEDecode` node) and provide your BASE API key. The node will upload the image to your BASE account as a side effect; it does not return any value to the graph.
+Place this node at the end of your workflow as an output node. Connect the generated image (typically from a `VAEDecode` node), provide your BASE API key and (optionally) a folder ID. The node will upload the image to your BASE account as a side effect; it does not return any value to the graph.
 
 ---
 

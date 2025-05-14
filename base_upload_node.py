@@ -4,23 +4,24 @@ from io import BytesIO
 import base64
 import numpy as np
 import torch
-
-OUTPUT_NODE = True
-output_ui = {"images": "IMAGE"}
+import folder_paths
+import os
 
 class UploadToBaseNode:
+    def __init__(self):
+        self.type = "output"
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "image": ("IMAGE",),
                 "api_key": ("STRING", {"default": ""}),
-                "folder": ("STRING", {"default": ""}),
+                "folder_id": ("STRING", {"default": ""}),
             }
         }
 
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("images",)
+    RETURN_TYPES = ()
     OUTPUT_NODE = True
     FUNCTION = "run"
     CATEGORY = "BASE"
@@ -28,7 +29,7 @@ class UploadToBaseNode:
     def run(self, image, api_key, folder):
         print("BASE node: running")
         print("API key:", api_key)
-        print("Folder:", folder)
+        print("Folder ID:", folder)
 
         image_data = image[0]
         img_array = (image_data.cpu().numpy() * 255).clip(0, 255).astype("uint8")
@@ -61,4 +62,19 @@ class UploadToBaseNode:
         }, timeout=30)
 
         print("Upload response code:", response.status_code)
-        return ([image_data],)
+
+        from PIL.PngImagePlugin import PngInfo
+
+        output_dir = folder_paths.get_output_directory()
+        filename = "uploaded_to_base.png"
+        full_path = os.path.join(output_dir, filename)
+
+        img.save(full_path, format="PNG", pnginfo=PngInfo(), compress_level=4)
+
+        results = [{
+            "filename": filename,
+            "subfolder": "",
+            "type": self.type,
+        }]
+
+        return { "ui": { "images": results } }
