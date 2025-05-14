@@ -16,7 +16,8 @@ class UploadToBaseNode:
             }
         }
 
-    RETURN_TYPES = []
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("images",)
     OUTPUT_NODE = True
     FUNCTION = "run"
     CATEGORY = "BASE"
@@ -57,4 +58,4 @@ class UploadToBaseNode:
         }, timeout=30)
 
         print("Upload response code:", response.status_code)
-        return []
+        return (image,)
