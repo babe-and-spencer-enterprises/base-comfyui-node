@@ -5,6 +5,9 @@ import base64
 import numpy as np
 import torch
 
+OUTPUT_NODE = True
+output_ui = {"images": "IMAGE"}
+
 class UploadToBaseNode:
     @classmethod
     def INPUT_TYPES(cls):
