@@ -26,10 +26,10 @@ class UploadToBaseNode:
     FUNCTION = "run"
     CATEGORY = "BASE"
 
-    def run(self, image, api_key, folder):
+    def run(self, image, api_key, folder_id):
         print("BASE node: running")
         print("API key:", api_key)
-        print("Folder ID:", folder)
+        print("Folder ID:", folder_id)
 
         image_data = image[0]
         img_array = (image_data.cpu().numpy() * 255).clip(0, 255).astype("uint8")
@@ -57,7 +57,7 @@ class UploadToBaseNode:
 
         response = requests.post("https://us-central1-base-14bf3.cloudfunctions.net/uploadImageToBase", json={
             "imageBase64": b64_image,
-            "parent": folder or None,
+            "parent": folder_id or None,
             "apiKey": api_key,
         }, timeout=30)
 
