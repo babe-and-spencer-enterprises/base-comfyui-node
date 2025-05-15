@@ -29,7 +29,7 @@ A custom [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node that lets you
 
 ## 🔐 Generate Your API Key
 
-1. Log in at [getbase.app](https://getbase.app)
+1. Log in at [go.getbase.app](https://go.getbase.app)
 2. Go to **Settings → Integrations**
 3. Click **Generate API Key**
 4. Copy and paste this key into the `api_key` input of the node in ComfyUI
@@ -40,10 +40,10 @@ This key securely links your uploads to your BASE account.
 
 ## 🛠️ Node Inputs
 
-| Input       | Description                                                                                                      |
-|-------------|------------------------------------------------------------------------------------------------------------------|
-| `image`     | The generated image to upload (connect from a `VAEDecode` node)                                                 |
-| `api_key`   | Your personal BASE API key (see below)                                                                          |
+| Input       | Description                                                                                                              |
+|-------------|--------------------------------------------------------------------------------------------------------------------------|
+| `image`     | The generated image to upload (connect from a `VAEDecode` node)                                                          |
+| `api_key`   | Your personal BASE API key (see above)                                                                                   |
 | `folder_id` | (Optional) The ID of a folder in your BASE account to store the image under. Right-click a folder in BASE to copy its ID. |
 
 ---
