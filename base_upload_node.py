@@ -18,7 +18,11 @@ class UploadToBaseNode:
                 "image": ("IMAGE",),
                 "api_key": ("STRING", {"default": ""}),
                 "folder_id": ("STRING", {"default": ""}),
-            }
+            },
+            "hidden": {
+                "prompt": "PROMPT",
+                "extra_pnginfo": "EXTRA_PNGINFO"
+            },
         }
 
     RETURN_TYPES = ()
@@ -26,14 +30,19 @@ class UploadToBaseNode:
     FUNCTION = "run"
     CATEGORY = "BASE"
 
-    def run(self, image, api_key, folder_id):
-        print("BASE node: running")
-        print("API key:", api_key)
-        print("Folder ID:", folder_id)
+    def run(self, image, api_key, folder_id, prompt=None, extra_pnginfo=None):
+        import json
+        from PIL.PngImagePlugin import PngInfo
+        pnginfo = PngInfo()
+        if prompt is not None:
+            pnginfo.add_text("prompt", json.dumps(prompt))
+        if extra_pnginfo is not None:
+            for k, v in extra_pnginfo.items():
+                pnginfo.add_text(k, json.dumps(v))
+
 
         image_data = image[0]
         img_array = (image_data.cpu().numpy() * 255).clip(0, 255).astype("uint8")
-        print("Image shape before handling:", img_array.shape)
 
         # Ensure shape is (H, W, C)
         if img_array.ndim == 3 and img_array.shape[2] in {1, 3}:
@@ -51,8 +60,14 @@ class UploadToBaseNode:
             img_array = np.repeat(img_array, 3, axis=2)
 
         img = Image.fromarray(img_array)
+
         buffer = BytesIO()
-        img.save(buffer, format="PNG")
+        img.save(buffer, format="PNG", pnginfo=pnginfo)
+
+        # Debug: write buffer to temp file to verify metadata
+        with open("/tmp/verify_base_upload.png", "wb") as f:
+            f.write(buffer.getvalue())
+
         b64_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
         response = requests.post("https://us-central1-base-14bf3.cloudfunctions.net/uploadImageToBase", json={
@@ -61,15 +76,10 @@ class UploadToBaseNode:
             "apiKey": api_key,
         }, timeout=30)
 
-        print("Upload response code:", response.status_code)
-
-        from PIL.PngImagePlugin import PngInfo
-
         output_dir = folder_paths.get_output_directory()
         filename = "uploaded_to_base.png"
         full_path = os.path.join(output_dir, filename)
-
-        img.save(full_path, format="PNG", pnginfo=PngInfo(), compress_level=4)
+        img.save(full_path, format="PNG", pnginfo=pnginfo)
 
         results = [{
             "filename": filename,
