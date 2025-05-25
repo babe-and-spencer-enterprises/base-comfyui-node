@@ -10,6 +10,6 @@ Repository = "https://github.com/babe-and-spencer-enterprises/base-comfyui-node"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "base"
 DisplayName = "base-comfyui-node"
 Icon = ""
