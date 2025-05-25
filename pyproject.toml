@@ -1,0 +1,15 @@
+[project]
+name = "base-comfyui-node"
+description = "A custom ComfyUI node that lets you upload generated images directly to your [a/BASE](https://getbase.app/) account — no manual downloads or re-uploads needed."
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["requests", "Pillow"]
+
+[project.urls]
+Repository = "https://github.com/babe-and-spencer-enterprises/base-comfyui-node"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "base-comfyui-node"
+Icon = ""
