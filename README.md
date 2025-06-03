@@ -1,12 +1,14 @@
 # ComfyUI Upload to BASE Node
 
-A custom [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node that lets you upload generated images directly to your [BASE](https://getbase.app) account — no manual downloads or re-uploads needed.
+A custom [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node that lets you upload generated media directly to your [BASE](https://getbase.app) account — no manual downloads or re-uploads needed.
 
 ---
 
 ## 🚀 Features
 
-- Upload any image from a ComfyUI workflow to your BASE account
+- Upload static images, animated WebP sequences, or MP4 videos from a ComfyUI workflow to your BASE account
+- Supports animated WebP generation from image sequences
+- Supports direct upload of browser-compatible MP4 video files
 - Optionally specify a folder ID to organize uploads
 - Secure uploads via personal API key
 - Streamlines creative workflow between ComfyUI and BASE
@@ -42,9 +44,14 @@ This key securely links your uploads to your BASE account.
 
 | Input       | Description                                                                                                              |
 |-------------|--------------------------------------------------------------------------------------------------------------------------|
-| `image`     | The generated image to upload (connect from a `VAEDecode` node)                                                          |
-| `api_key`   | Your personal BASE API key (see above)                                                                                   |
-| `folder_id` | (Optional) The ID of a folder in your BASE account to store the image under. Right-click a folder in BASE to copy its ID. |
+| `image`     | The generated image to upload (connect from a `VAEDecode` node). Supports single image or list of images for animation.  |
+| `video`     | (Optional) A video file to upload as browser-compatible MP4. Takes precedence over `image` if provided.                  |
+| `fps`       | (Optional) Frame rate for animated WebP output (applies when uploading multiple images as animation).                    |
+| `lossless`  | (Optional) Whether to save the animated WebP in lossless mode.                                                           |
+| `quality`   | (Optional) Quality setting for animated WebP (0–100).                                                                    |
+| `method`    | (Optional) Encoding method for animated WebP (`default`, `fastest`, or `slowest`).                                       |
+| `api_key`   | Your personal BASE API key (see above).                                                                                  |
+| `folder_id` | (Optional) The ID of a folder in your BASE account to store the image/video under. Right-click a folder in BASE to copy its ID. |
 
 ---
 
@@ -52,11 +59,21 @@ This key securely links your uploads to your BASE account.
 
 This is an output node in ComfyUI. It performs an upload as a side effect and does not return any value to the graph.
 
+- If `video` is provided, the node uploads a browser-compatible MP4 video to your BASE account.
+- If `image` is a list of multiple frames, the node generates and uploads an animated WebP file.
+- Otherwise, a static PNG image is uploaded.
+
 ---
 
 ## 💡 Example Workflow
 
-Place this node at the end of your workflow as an output node. Connect the generated image (typically from a `VAEDecode` node), provide your BASE API key and (optionally) a folder ID. The node will upload the image to your BASE account as a side effect; it does not return any value to the graph.
+Place this node at the end of your workflow as an output node. Example use cases:
+
+- **Static image upload:** Connect a single image (e.g., from `VAEDecode`) to `image` input to upload a PNG.
+- **Animated image sequence:** Connect a list of images (frames) to `image` input and set `fps`/`quality`/`lossless`/`method` as desired to upload an animated WebP.
+- **Video upload:** Connect a video file to the `video` input to upload it as an MP4.
+
+Provide your BASE API key and (optionally) a folder ID. The node will upload the file to your BASE account as a side effect; it does not return any value to the graph.
 
 ---
 
