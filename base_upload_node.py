@@ -38,7 +38,8 @@ class UploadToBaseNode:
     FUNCTION = "run"
     CATEGORY = "BASE"
 
-    def run(self, image=None, video=None, api_key=None, folder_id=None, fps=10.0, lossless=False, quality=80, method="default", prompt=None, extra_pnginfo=None):
+    def run(self, image=None, video=None, api_key=None, folder_id=None, fps=10.0, lossless=False,
+            quality=80, method="default", prompt=None, extra_pnginfo=None):
         import json
         from PIL import Image, PngImagePlugin
         from io import BytesIO
@@ -56,7 +57,9 @@ class UploadToBaseNode:
             stream.height = video.get_dimensions()[1]
             stream.pix_fmt = "yuv420p"
             for frame in video.get_components().images:
-                frame = av.VideoFrame.from_ndarray(torch.clamp(frame[..., :3] * 255, 0, 255).to(torch.uint8).cpu().numpy(), format="rgb24")
+                frame = av.VideoFrame.from_ndarray(
+                    torch.clamp(frame[..., :3] * 255, 0, 255).to(torch.uint8).cpu().numpy(),
+                    format="rgb24")
                 for packet in stream.encode(frame):
                     container.mux(packet)
             container.mux(stream.encode())
@@ -74,7 +77,8 @@ class UploadToBaseNode:
                     if img_array.shape[3] in {1, 3}:
                         img_array = img_array[0]  # Take first image in batch
                     else:
-                        raise ValueError(f"Unexpected channel dimension in batch: {img_array.shape}")
+                        raise ValueError(
+                            f"Unexpected channel dimension in batch: {img_array.shape}")
 
                 if img_array.ndim == 3:
                     if img_array.shape[0] in {1, 3}:
