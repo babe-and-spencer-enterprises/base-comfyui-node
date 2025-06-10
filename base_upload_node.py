@@ -22,10 +22,6 @@ class UploadToBaseNode:
                 "image": ("IMAGE", {"default": None}),
                 "video": ("VIDEO", {"default": None}),
                 "folder_id": ("STRING", {"default": None}),
-                "fps": ("FLOAT", {"default": 10.0, "min": 0.01, "max": 1000.0, "step": 0.01}),
-                "lossless": ("BOOLEAN", {"default": False}),
-                "quality": ("INT", {"default": 80, "min": 0, "max": 100}),
-                "method": (["default", "fastest", "slowest"], {"default": "default"}),
             },
             "hidden": {
                 "prompt": "PROMPT",
@@ -38,12 +34,14 @@ class UploadToBaseNode:
     FUNCTION = "run"
     CATEGORY = "BASE"
 
-    def run(self, image=None, video=None, api_key=None, folder_id=None, fps=10.0, lossless=False,
-            quality=80, method="default", prompt=None, extra_pnginfo=None):
+    def run(self, image=None, video=None, api_key=None, folder_id=None, prompt=None, extra_pnginfo=None):
         import json
         from PIL import Image, PngImagePlugin
         from io import BytesIO
         import tempfile
+
+        if image is None and video is None:
+            raise ValueError("Either 'image' or 'video' must be provided.")
 
         if video is not None:
             mime_type = "video/mp4"
@@ -96,43 +94,28 @@ class UploadToBaseNode:
 
                 return Image.fromarray(img_array)
 
-            is_animated = isinstance(image, list) and len(image) > 1
+            # Removed is_animated check and related logic; animated images not supported
+            if isinstance(image, list) and len(image) > 1:
+                raise ValueError("Animated image export is not supported.")
 
-            if is_animated:
-                # Animated WebP logic
-                pil_images = [tensor_to_pil(t) for t in image]
-                buffer = BytesIO()
-                pil_images[0].save(
-                    buffer,
-                    format="WEBP",
-                    save_all=True,
-                    append_images=pil_images[1:],
-                    duration=int(1000 / fps),
-                    loop=0,
-                    lossless=lossless,
-                    quality=quality,
-                    method={"default": 4, "fastest": 0, "slowest": 6}.get(method, 4),
-                )
-                mime_type = "image/webp"
-                filename = "uploaded_to_base.webp"
-            else:
-                # Static PNG logic
-                img_tensor = image[0] if isinstance(image, list) else image
-                img = tensor_to_pil(img_tensor)
+            # Static PNG logic
+            img_tensor = image[0] if isinstance(image, list) else image
+            img = tensor_to_pil(img_tensor)
 
-                pnginfo = PngImagePlugin.PngInfo()
-                if prompt is not None:
-                    pnginfo.add_text("prompt", json.dumps(prompt))
-                if extra_pnginfo is not None:
-                    for k, v in extra_pnginfo.items():
-                        pnginfo.add_text(k, json.dumps(v))
+            pnginfo = PngImagePlugin.PngInfo()
+            if prompt is not None:
+                pnginfo.add_text("prompt", json.dumps(prompt))
+            if extra_pnginfo is not None:
+                for k, v in extra_pnginfo.items():
+                    pnginfo.add_text(k, json.dumps(v))
 
-                buffer = BytesIO()
-                img.save(buffer, format="PNG", pnginfo=pnginfo)
-                mime_type = "image/png"
-                filename = "uploaded_to_base.png"
+            buffer = BytesIO()
+            img.save(buffer, format="PNG", pnginfo=pnginfo)
+            mime_type = "image/png"
+            filename = "uploaded_to_base.png"
 
         # Save locally for debug
+        import tempfile
         verify_path = os.path.join(tempfile.gettempdir(), filename)
         with open(verify_path, "wb") as f:
             f.write(buffer.getvalue())
@@ -146,7 +129,7 @@ class UploadToBaseNode:
                 "apiKey": api_key,
                 "mimeType": mime_type,
                 "filename": filename,
-            }, timeout=30)
+            }, timeout=60)
 
         if response.status_code != 200:
             raise RuntimeError(f"Upload failed with status {response.status_code}: {response.text}")
@@ -162,4 +145,4 @@ class UploadToBaseNode:
             "type": self.type,
         }]
 
-        return {"ui": {"images": results, "animated": (is_animated,)}}
+        return {"ui": {"images": results}}
