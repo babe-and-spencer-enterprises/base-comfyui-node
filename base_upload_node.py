@@ -17,6 +17,10 @@ class UploadToBaseNode:
         return {
             "required": {
                 "api_key": ("STRING", {"default": None}),
+                "filename_prefix": ("STRING", {
+                    "default": "ComfyUI",
+                    "tooltip": "The prefix for the file to save. This may include formatting information such as %date:yyyy-MM-dd% or %Empty Latent Image.width% to include values from nodes."
+                }),
             },
             "optional": {
                 "image": ("IMAGE", {"default": None}),
@@ -35,7 +39,7 @@ class UploadToBaseNode:
     CATEGORY = "BASE"
 
     def run(self, image=None, video=None, api_key=None, folder_id=None, prompt=None,
-            extra_pnginfo=None):
+            filename_prefix=None, extra_pnginfo=None):
         import json
         from PIL import Image, PngImagePlugin
         from io import BytesIO
@@ -44,10 +48,33 @@ class UploadToBaseNode:
         if image is None and video is None:
             raise ValueError("Either 'image' or 'video' must be provided.")
 
+        # Determine width and height safely
+        if video is not None:
+            width, height = video.get_dimensions()
+        elif image is not None:
+            if torch.is_tensor(image) and image.ndim == 4:
+                image_tensor = image[0]
+            elif isinstance(image, list) and len(image) > 0:
+                image_tensor = image[0]
+            else:
+                image_tensor = image
+            width, height = image_tensor.shape[-1], image_tensor.shape[-2]
+        else:
+            raise ValueError("Either 'image' or 'video' must be provided.")
+
+        if not filename_prefix:
+            filename_prefix = "ComfyUI"
+
+        full_output_folder, filename_base, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
+            filename_prefix,
+            folder_paths.get_output_directory(),
+            width,
+            height
+        )
+
         if video is not None:
             mime_type = "video/mp4"
-            filename = "uploaded_to_base.mp4"
-            is_animated = False
+            filename = f"{filename_base}_{counter:05}_.mp4"
             buffer = BytesIO()
             import av
             container = av.open(buffer, mode='w', format='mp4')
@@ -98,7 +125,6 @@ class UploadToBaseNode:
 
                 return Image.fromarray(img_array)
 
-            # Removed is_animated check and related logic; animated images not supported
             if isinstance(image, list) and len(image) > 1:
                 raise ValueError("Animated image export is not supported.")
 
@@ -116,7 +142,7 @@ class UploadToBaseNode:
             buffer = BytesIO()
             img.save(buffer, format="PNG", pnginfo=pnginfo)
             mime_type = "image/png"
-            filename = "uploaded_to_base.png"
+            filename = f"{filename_base}_{counter:05}_.png"
 
         # Save locally for debug
         import tempfile
@@ -138,14 +164,13 @@ class UploadToBaseNode:
         if response.status_code != 200:
             raise RuntimeError(f"Upload failed with status {response.status_code}: {response.text}")
 
-        output_dir = folder_paths.get_output_directory()
-        full_path = os.path.join(output_dir, filename)
+        full_path = os.path.join(full_output_folder, filename)
         with open(full_path, "wb") as f:
             f.write(buffer.getvalue())
 
         results = [{
             "filename": filename,
-            "subfolder": "",
+            "subfolder": subfolder,
             "type": self.type,
         }]
 
