@@ -51,8 +51,11 @@ class UploadToBaseNode:
             import av
             container = av.open(buffer, mode='w', format='mp4')
             stream = container.add_stream("libx264", rate=video.get_components().frame_rate)
-            stream.width = video.get_dimensions()[0]
-            stream.height = video.get_dimensions()[1]
+            width, height = video.get_dimensions()
+            width -= width % 2
+            height -= height % 2
+            stream.width = width
+            stream.height = height
             stream.pix_fmt = "yuv420p"
             for frame in video.get_components().images:
                 frame = av.VideoFrame.from_ndarray(
