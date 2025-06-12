@@ -48,6 +48,24 @@ class UploadToBaseNode:
         if image is None and video is None:
             raise ValueError("Either 'image' or 'video' must be provided.")
 
+        # Remove api_key from extra_pnginfo if present and sanitize nested workflow nodes
+        if extra_pnginfo:
+            # Remove any top-level "api_key"
+            extra_pnginfo = {
+                k: v for k, v in extra_pnginfo.items()
+                if k.lower() != "api_key"
+            }
+
+            # Sanitize nested api_key in workflow nodes
+            workflow = extra_pnginfo.get("workflow")
+            if workflow and isinstance(workflow, dict):
+                for node in workflow.get("nodes", []):
+                    if node.get("type") == "UploadToBaseNode":
+                        widgets = node.get("widgets_values")
+                        api_key_index = list(self.INPUT_TYPES()["required"]).index("api_key")
+                        if isinstance(widgets, list) and len(widgets) > api_key_index:
+                            widgets[api_key_index] = ""
+
         # Determine width and height safely
         if video is not None:
             width, height = video.get_dimensions()
@@ -99,7 +117,9 @@ class UploadToBaseNode:
                 image = list(image)
 
             def tensor_to_pil(img_tensor):
-                img_array = (img_tensor.cpu().numpy() * 255).clip(0, 255).astype("uint8")
+                img_array = img_tensor.cpu().numpy()
+                img_array = np.nan_to_num(img_array, nan=0.0, posinf=255.0, neginf=0.0)
+                img_array = (img_array * 255).clip(0, 255).astype("uint8")
 
                 # If it's a batch of images, select the first one (or raise if unexpected)
                 if img_array.ndim == 4:
