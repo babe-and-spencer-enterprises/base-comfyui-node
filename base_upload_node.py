@@ -34,7 +34,8 @@ class UploadToBaseNode:
     FUNCTION = "run"
     CATEGORY = "BASE"
 
-    def run(self, image=None, video=None, api_key=None, folder_id=None, prompt=None, extra_pnginfo=None):
+    def run(self, image=None, video=None, api_key=None, folder_id=None, prompt=None,
+            extra_pnginfo=None):
         import json
         from PIL import Image, PngImagePlugin
         from io import BytesIO
@@ -148,4 +149,9 @@ class UploadToBaseNode:
             "type": self.type,
         }]
 
-        return {"ui": {"images": results}}
+        return {
+            "ui": {
+                "images": results,
+                "animated": (True,) if video is not None else (False,)
+            }
+        }
