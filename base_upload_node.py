@@ -169,6 +169,7 @@ class UploadToBaseNode:
                     pnginfo.add_text(k, json.dumps(v))
 
             buffer = BytesIO()
+            img = img.convert("RGB")
             img.save(buffer, format="PNG", pnginfo=pnginfo)
             mime_type = "image/png"
             filename = f"{filename_base}_{counter:05}_.png"
