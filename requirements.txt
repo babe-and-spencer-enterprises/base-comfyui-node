@@ -2,5 +2,3 @@ requests
 Pillow
 torch
 numpy
-av
-ffmpeg-python
