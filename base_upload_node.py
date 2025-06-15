@@ -52,8 +52,6 @@ class UploadToBaseNode:
                 extra_pnginfo = {}
             if "workflow" not in extra_pnginfo:
                 extra_pnginfo["workflow"] = prompt
-        # Print a snippet of the embedded workflow metadata for verification
-        print("[UploadToBaseNode] Embedded workflow metadata:", json.dumps(extra_pnginfo.get("workflow"), indent=2)[:500])
 
         if image is None and video is None:
             raise ValueError("Either 'image' or 'video' must be provided.")
