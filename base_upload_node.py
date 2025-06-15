@@ -6,6 +6,7 @@ import requests
 import torch
 from PIL import Image
 from io import BytesIO
+import subprocess
 
 
 class UploadToBaseNode:
@@ -44,6 +45,13 @@ class UploadToBaseNode:
         from PIL import Image, PngImagePlugin
         from io import BytesIO
         import tempfile
+
+        # Auto-embed the current prompt as "workflow" if available
+        if prompt and isinstance(prompt, dict):
+            if extra_pnginfo is None:
+                extra_pnginfo = {}
+            if "workflow" not in extra_pnginfo:
+                extra_pnginfo["workflow"] = prompt
 
         if image is None and video is None:
             raise ValueError("Either 'image' or 'video' must be provided.")
@@ -93,24 +101,25 @@ class UploadToBaseNode:
         if video is not None:
             mime_type = "video/mp4"
             filename = f"{filename_base}_{counter:05}_.mp4"
-            buffer = BytesIO()
-            import av
-            container = av.open(buffer, mode='w', format='mp4')
-            stream = container.add_stream("libx264", rate=video.get_components().frame_rate)
-            width, height = video.get_dimensions()
-            width -= width % 2
-            height -= height % 2
-            stream.width = width
-            stream.height = height
-            stream.pix_fmt = "yuv420p"
-            for frame in video.get_components().images:
-                frame = av.VideoFrame.from_ndarray(
-                    torch.clamp(frame[..., :3] * 255, 0, 255).to(torch.uint8).cpu().numpy(),
-                    format="rgb24")
-                for packet in stream.encode(frame):
-                    container.mux(packet)
-            container.mux(stream.encode())
-            container.close()
+
+            # Prepare metadata
+            if extra_pnginfo is None:
+                extra_pnginfo = {}
+            if prompt is not None:
+                extra_pnginfo.setdefault("prompt", prompt)
+            extra_pnginfo.setdefault("workflow_type", "video")
+
+            save_path = os.path.join(full_output_folder, filename)
+            video.save_to(
+                save_path,
+                format="mp4",
+                codec="h264",
+                metadata=extra_pnginfo
+            )
+
+            # Read saved video into buffer for upload
+            with open(save_path, "rb") as f:
+                buffer = BytesIO(f.read())
         else:
             # Convert batched tensor to list if needed
             if torch.is_tensor(image) and image.ndim == 4:

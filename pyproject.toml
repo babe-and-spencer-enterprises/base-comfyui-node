@@ -1,9 +1,14 @@
 [project]
 name = "base-comfyui-node"
-description = "A custom ComfyUI node that lets you upload generated images directly to your [a/BASE](https://getbase.app/) account — no manual downloads or re-uploads needed."
-version = "1.0.2"
+description = "A custom [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node that lets you upload generated media directly to your [BASE](https://getbase.app) account — no manual downloads or re-uploads needed."
+version = "1.1.2"
 license = {file = "LICENSE"}
-dependencies = ["requests", "Pillow"]
+dependencies = [
+    "requests",
+    "Pillow",
+    "torch",
+    "numpy"
+]
 
 [project.urls]
 Repository = "https://github.com/babe-and-spencer-enterprises/base-comfyui-node"
