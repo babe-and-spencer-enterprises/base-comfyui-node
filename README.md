@@ -37,6 +37,8 @@ A custom [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node that lets you
 
 This key securely links your uploads to your BASE account.
 
+![Generate API Key Screenshot](https://go.getbase.app/assets/assets/base_copyapikey.png)
+
 ---
 
 ## 🛠️ Node Inputs
