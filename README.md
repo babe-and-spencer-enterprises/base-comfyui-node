@@ -43,12 +43,13 @@ This key securely links your uploads to your BASE account.
 
 ## 🛠️ Node Inputs
 
-| Input       | Description                                                                                                              |
-|-------------|--------------------------------------------------------------------------------------------------------------------------|
-| `image`     | (Optional) A single image to upload (connect from a `VAEDecode` node). Ignored if `video` is provided.                   |
-| `video`     | (Optional) A video file to upload as browser-compatible MP4. Takes precedence over `image`.                              |
-| `api_key`   | Your personal BASE API key (see above).                                                                                  |
-| `folder_id` | (Optional) The ID of a folder in your BASE account to store the image/video under. Right-click a folder in BASE to copy its ID. |
+| Input            | Description                                                                                                                              |
+|------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `image`          | (Optional) A single image to upload (connect from a `VAEDecode` node). Ignored if `video` is provided.                                  |
+| `video`          | (Optional) A video file to upload as browser-compatible MP4. Takes precedence over `image`.                                             |
+| `api_key`        | Your personal BASE API key (see above).                                                                                                  |
+| `filename_prefix`| (Optional) Prefix for the saved file name. May include formatting variables like `%date:yyyy-MM-dd%`. Defaults to `"ComfyUI"`.         |
+| `folder_id`      | (Optional) The ID of a folder in your BASE account to store the image/video under. Right-click a folder in BASE to copy its ID.         |
 
 **At least one of `image` or `video` must be provided.**
 
@@ -71,6 +72,10 @@ Place this node at the end of your workflow as an output node. Example use cases
 - **Video upload:** Connect a video file to the `video` input to upload it as an MP4.
 
 Provide your BASE API key and (optionally) a folder ID. The node will upload the file to your BASE account as a side effect; it does not return any value to the graph.
+
+You can customize the file naming by setting the `filename_prefix` input. This helps keep your uploads organized by including date or node values.
+
+![Example Workflow Screenshot](https://go.getbase.app/assets/assets/vae_decode.png)
 
 ---
 
